@@ -6,6 +6,8 @@ import sys
 import sqlite3
 from sqlite3 import Error as SQL_Error, Connection
 
+from pyais import decode, IterMessages
+
 DB_FILE = 'ais-data.db'
 
 
@@ -22,7 +24,41 @@ def create_tables(con):
     """ Create tables if they don't exist. """
     tables = [
         """
-            CREATE TABLE IF NOT EXISTS classAPositionReport (
+        create table if not exists dataCollection
+        (
+            collection_id integer not null
+                constraint data_collection_pk
+                primary key autoincrement,
+            location_id   integer not null
+        );
+        """,
+        """
+        create table if not exists dataLocation
+        (
+            location_id integer not null
+                constraint data_location_pk
+                primary key autoincrement,
+            site_name        text    not null,
+            latitude    real default 0.0,
+            longitude   real default 0.0,
+            description text
+        )
+        """,
+
+        """
+            create table if not exists rawData
+            (
+                sentence_id integer not null
+                    constraint rawData_pk
+                    primary key autoincrement,
+                s_type        integer not null,
+                s_data        TEXT    not null,
+                location_id integer not null
+            )
+        """,
+        """
+            CREATE TABLE IF NOT EXISTS classAPositionReport 
+            (                
                 msgID INTEGER NOT NULL,
                 repeatIndicator INTEGER,
                 userID INTEGER,
@@ -40,7 +76,7 @@ def create_tables(con):
                 subMessage INTEGER
               )
         """
-        ]
+    ]
     try:
         cur = con.cursor()
         for sql in tables:
@@ -53,8 +89,36 @@ def create_tables(con):
         )
 
 
+def add_raw_data(con, s_type, s_data):
+    """ Add a new sentence to the database raw table. """
+    sql = '''
+        insert into rawData(s_type, s_data, location_id)
+        values(:s_type, :s_data, :location_id)
+    '''
+    try:
+        sql_args = {'s_type': s_type, 's_data': s_data, 'location_id': 1}
+        cur = con.cursor()
+        cur.execute(sql, sql_args)
+        con.commit()
+    except SQL_Error as error:
+        raise SystemExit(
+            '\n\nERROR during insert = {}\n\n'.format(error)
+        )
+
+
 def parse_ais_file(con, ais_file_name):
     print("type something we are paying you...")
+
+    with open(ais_file_name) as file_in:
+        try:
+            for line in file_in:
+                if line.startswith("!AI"):
+                    decoded = decode(line)
+                    add_raw_data(con, decoded.msg_type, line)
+                    print(decoded)
+                    print(line, end='')
+        except IOError as error:
+            raise SystemExit('ERROR while reading file = {}'.format(error))
 
 
 def main(ais_file_name):
