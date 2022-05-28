@@ -4,9 +4,14 @@
 import os
 import sys
 import sqlite3
+from pathlib import Path
 from sqlite3 import Error as SQL_Error, Connection
 
 from pyais import decode, IterMessages
+
+from pyais.exceptions import TooManyMessagesException, MissingMultipartMessageException
+from pyais.messages import NMEAMessage, ANY_MESSAGE
+
 
 DB_FILE = 'ais-data.db'
 
@@ -80,7 +85,7 @@ def create_tables(con):
     try:
         cur = con.cursor()
         for sql in tables:
-            print("executing: {}\n".format(sql))
+            # print("executing: {}\n".format(sql))
             cur.execute(sql)
         con.commit()
     except SQL_Error as error:
@@ -113,8 +118,12 @@ def parse_ais_file(con, ais_file_name):
         try:
             for line in file_in:
                 if line.startswith("!AI"):
-                    decoded = decode(line)
-                    add_raw_data(con, decoded.msg_type, line)
+                    try:
+                        decoded = decode(line)
+                        add_raw_data(con, decoded.msg_type, line)
+                    except MissingMultipartMessageException as warning:
+                        print("WARNING! {}".format(warning))
+
                     print(decoded)
                     print(line, end='')
         except IOError as error:
@@ -126,8 +135,16 @@ def main(ais_file_name):
     conn = get_db_connection(DB_FILE)
     if conn is not None:
         create_tables(conn)
-        if os.path.exists(ais_file_name):
-            parse_ais_file(conn, ais_file_name)
+
+        file_path = Path(ais_file_name)
+
+        if file_path.is_file():
+            print("is a file: {}".format(file_path))
+
+        # if os.path.exists(ais_file_name):
+
+        if file_path.exists():
+            parse_ais_file(conn, file_path)
         else:
             raise SystemExit(
                 'Unable to read from file: {}'.format(ais_file_name)
