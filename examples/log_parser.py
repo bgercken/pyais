@@ -180,7 +180,6 @@ def add_class_a_position_report(con, data):
             :accuracy, :lon, :lat, :course, :heading, :second, :maneuver, :raim, :radio
         )
     '''
-    print("Class A position report.")
     sentence_id = get_last_sentence_id(con)
     try:
         sql_args = {
@@ -214,7 +213,6 @@ def add_class_b_position_report(con, data):
             :raim, :radio
         )
     '''
-    print("Class B position report.")
     sentence_id = get_last_sentence_id(con)
     try:
         sql_args = {
@@ -237,12 +235,12 @@ def add_class_b_position_report(con, data):
         )
 
 
-def add_base_station_report(con, decoded):
+def add_base_station_report(con, data):
     """ Add the decoded data to a base_station_report. """
     print("Base station report.")
 
 
-def add_decoded_data(con, decoded):
+def add_decoded_data(con, data):
     """
     Use this function to store appropriate record based on type.
     We only care about the types stored below.
@@ -252,35 +250,39 @@ def add_decoded_data(con, decoded):
     class_b_report = [18]
     base_station_report = [4]
 
-    msg_type = decoded.msg_type
+    msg_type = data.msg_type
 
     if msg_type in class_a_reports:
-        add_class_a_position_report(con, decoded)
+        add_class_a_position_report(con, data)
     elif msg_type in class_b_report:
-        add_class_b_position_report(con, decoded)
+        add_class_b_position_report(con, data)
+    """    
     elif msg_type in base_station_report:
-        add_base_station_report(con, decoded)
+        add_base_station_report(con, data)
     else:
-        print("Unhandled report type.")
+        print("Unhandled report type {}.".format(data.msg_type))
+    """
 
 
 def parse_ais_file(con, ais_file_name):
-    print("type something we are paying you...")
-
+    count = 0
     with open(ais_file_name) as file_in:
         try:
             for line in file_in:
+                count += 1
                 if line.startswith("!AI"):
                     try:
                         decoded = decode(line)
                         add_raw_data(con, decoded.msg_type, line, 0)
                         add_decoded_data(con, decoded)
                     except MissingMultipartMessageException as warning:
-                        print("WARNING! {}".format(warning))
+                        # print("WARNING! {}".format(warning))
                         # Warning during decode so set error flag.
                         add_raw_data(con, decoded.msg_type, line, 1)
-                    print(decoded)
-                    print(line, end='')
+                    # print(decoded)
+                    # print(line, end='')
+                if count % 100 == 0:
+                    print(".", end='')
         except IOError as error:
             raise SystemExit('ERROR while reading file = {}'.format(error))
 
