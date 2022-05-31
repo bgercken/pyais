@@ -64,7 +64,7 @@ def get_last_sentence_id(con):
 
 
 def add_class_a_position_report(con, data):
-    """ Add the decoded data to an A position report. """
+    """ Add the decoded data to an A position report. Types 1, 2, and 3. """
     sql = '''
         insert into classAPositionReport(
             sentence_id, msg_type, repeat, mmsi, status, turn, speed,
@@ -84,7 +84,7 @@ def add_class_a_position_report(con, data):
             'lon': data.lon, 'lat': data.lat, 'course': data.course, 'heading': data.heading,
             'second': data.second, 'maneuver': data.maneuver, 'raim': data.raim,
             'radio': data.radio
-                    }
+        }
         cur = con.cursor()
         cur.execute(sql, sql_args)
         con.commit()
@@ -94,8 +94,13 @@ def add_class_a_position_report(con, data):
         )
 
 
+def add_base_station_report(con, data):
+    """ Add the decoded data to a base_station_report.  Type 4. """
+    print("Base station report.")
+
+
 def add_class_b_position_report(con, data):
-    """ Add the decoded data to an B position report. """
+    """ Add the decoded data to an B position report. Type 18. """
     sql = '''
         insert into classBPositionReport(
             sentence_id, msg_type, repeat, mmsi, speed, accuracy, lon, lat, 
@@ -130,9 +135,9 @@ def add_class_b_position_report(con, data):
         )
 
 
-def add_base_station_report(con, data):
-    """ Add the decoded data to a base_station_report. """
-    print("Base station report.")
+def add_extended_class_b_position_report(con, data):
+    """ Add extended class b position report. Type 19. """
+    print("Extended Class B Position Report")
 
 
 def add_decoded_data(con, data):
@@ -142,18 +147,23 @@ def add_decoded_data(con, data):
     """
 
     class_a_reports = [1, 2, 3]
-    class_b_report = [18]
     base_station_report = [4]
+    class_b_report = [18]
+    extended_class_b_position_report = [19]
 
     msg_type = data.msg_type
 
     if msg_type in class_a_reports:
         add_class_a_position_report(con, data)
-    elif msg_type in class_b_report:
-        add_class_b_position_report(con, data)
-    """    
     elif msg_type in base_station_report:
         add_base_station_report(con, data)
+    elif msg_type in class_b_report:
+        add_class_b_position_report(con, data)
+    elif msg_type in extended_class_b_position_report(con, data):
+        add_extended_class_b_position_report(con, data)
+
+    """    
+    
     else:
         print("Unhandled report type {}.".format(data.msg_type))
     """
