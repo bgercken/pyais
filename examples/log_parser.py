@@ -17,7 +17,7 @@ from pyais.exceptions import MissingMultipartMessageException
 # from pyais.messages import NMEAMessage, ANY_MESSAGE
 
 
-DB_FILE = 'ais-data.db'
+DEFAULT_DB_FILE = 'ais-data.db'
 
 
 def get_db_connection(db_file):
@@ -192,9 +192,9 @@ def parse_ais_file(con, ais_file_name):
             raise SystemExit('ERROR while reading file = {}'.format(error))
 
 
-def main(ais_file_name):
+def main(ais_file_name, db_file):
     """ Run as a program. """
-    conn = get_db_connection(DB_FILE)
+    conn = get_db_connection(db_file)
     if conn is not None:
         file_path = Path(ais_file_name)
         if file_path.is_file():
@@ -207,7 +207,7 @@ def main(ais_file_name):
             )
     else:
         raise SystemExit(
-            'Unable to create or open database file: {}'.format(DB_FILE)
+            'Unable to create or open database file: {}'.format(db_file)
         )
 
     try:
@@ -218,6 +218,10 @@ def main(ais_file_name):
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
-        print("Usage:", sys.argv[0], "/path/to/ais_log_file")
+        print("Usage:", sys.argv[0], "/path/to/ais_log_file" "/path/to/ais.db")
         sys.exit(1)
-    main(sys.argv[1])
+    if len(sys.argv) == 3:
+        database_file = sys.argv[2]
+    else:
+        database_file = DEFAULT_DB_FILE
+    main(sys.argv[1], database_file)
