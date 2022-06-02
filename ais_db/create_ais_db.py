@@ -66,6 +66,21 @@ def create_tables(con):
             )
         """,
         """
+            create table if not exists nemaFields
+            (
+                sentence_id integer not null
+                    constraint nemaFields_rawData_sentence_id_fk
+                    references rawData,
+                field1      text    not null,
+                field2      integer not null,
+                field3      integer not null,
+                field4      integer,
+                field5      text,
+                field6      text    not null,
+                field7      text    not null
+            )
+        """,
+        """
             CREATE TABLE IF NOT EXISTS classAPositionReport 
             (                
                 sentence_id INTEGER NOT NULL,
