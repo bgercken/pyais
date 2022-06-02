@@ -132,7 +132,7 @@ def create_tables(con):
         )
 
 
-def populate_ais_message_types(con):
+def add_ais_message_types(con):
     data = [AisMessageType(1, 'Position Report', 'Scheduled position report; Class A shipborne mobile equipment'),
             AisMessageType(2, 'Position Report',
                            'Assigned scheduled position report; Class A shipborne mobile equipment'),
@@ -196,7 +196,7 @@ def populate_ais_message_types(con):
             raise SystemExit('\n\nERROR inserting values - {}'.format(error))
 
 
-def load_ais_message_types(con):
+def populate_ais_message_types(con):
     """ A function to populate the AIS message type table if it is empty. """
     message_id = 0
     sql = '''
@@ -216,13 +216,13 @@ def load_ais_message_types(con):
     print('message_id {}'.format(message_id))
 
     if message_id != 27:
-        populate_ais_message_types(con)
+        add_ais_message_types(con)
 
 
 def main(database_name):
     conn = get_db_connection(database_name)
     create_tables(conn)
-    load_ais_message_types(conn)
+    populate_ais_message_types(conn)
 
 
 if __name__ == '__main__':
