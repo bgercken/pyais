@@ -159,7 +159,7 @@ def add_decoded_data(con, data):
         add_base_station_report(con, data)
     elif msg_type in class_b_report:
         add_class_b_position_report(con, data)
-    elif msg_type in extended_class_b_position_report(con, data):
+    elif msg_type in extended_class_b_position_report:
         add_extended_class_b_position_report(con, data)
 
     """    
@@ -217,8 +217,8 @@ def main(ais_file_name, db_file):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        print("Usage:", sys.argv[0], "/path/to/ais_log_file" "/path/to/ais.db")
+    if len(sys.argv) < 2:
+        print("Usage: {} {} {}", sys.argv[0], "/path/to/ais_log_file", "/path/to/ais.db")
         sys.exit(1)
     if len(sys.argv) == 3:
         database_file = sys.argv[2]
