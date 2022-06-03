@@ -66,15 +66,15 @@ def create_tables(con):
             )
         """,
         """
-            create table if not exists nemaFields
+            create table if not exists rawFields
             (
                 sentence_id integer not null
-                    constraint nemaFields_rawData_sentence_id_fk
+                    constraint rawFields_rawData_sentence_id_fk
                     references rawData,
                 field1      text    not null,
-                field2      integer not null,
-                field3      integer not null,
-                field4      integer,
+                field2      text not null,
+                field3      text not null,
+                field4      text,
                 field5      text,
                 field6      text    not null,
                 field7      text    not null

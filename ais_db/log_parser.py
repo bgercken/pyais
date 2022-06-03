@@ -29,20 +29,21 @@ def get_db_connection(db_file):
     return conn
 
 
-def add_field_data(con, s_id, s_data):
+def add_field_data(con, s_data):
     """ Add a row to the nemaTable with the sentence fields. """
     sql = '''
-        insert into nemaFields(sentence_id, field1, field2, field3, field4, field5, field6, field7)
+        insert into rawFields(sentence_id, field1, field2, field3, field4, field5, field6, field7)
         values(:sentence_id, :field1, :field2, :field3, :field4, :field5, :field6, :field7)
     '''
-
+    s_id = get_last_sentence_id(con)
     fields = s_data.split(",")
 
     if len(fields) == 7:
         try:
-            sql_args = { 'sentence_id': s_id, 'field1': fields[0], 'field2': int(fields[1]), 'field3': int(fields[2]),
-                         'field4': int(fields[3]), 'field5': fields[4], 'field6': fields[5], 'field7': fields[6]
-                        }
+            sql_args = {
+                'sentence_id': s_id, 'field1': fields[0], 'field2': fields[1], 'field3': fields[2],
+                'field4': fields[3], 'field5': fields[4], 'field6': fields[5], 'field7': fields[6]
+                }
             cur = con.cursor()
             cur.execute(sql, sql_args)
             con.commit()
@@ -65,14 +66,13 @@ def add_raw_data(con, s_type, s_data, has_error):
         sql_args = {'s_type': s_type, 's_data': s_data, 'location_id': 1, 'hasError': has_error}
         cur = con.cursor()
         cur.execute(sql, sql_args)
-        #  print("s_row_id: {}".format(s_row_id))
         con.commit()
     except SQL_Error as error:
         raise SystemExit(
             '\n\nERROR during insert = {}\n\n'.format(error)
         )
 
-    #  add_field_data(con, s_row_id, s_data)
+    add_field_data(con, s_data)
 
 
 def get_last_sentence_id(con):
