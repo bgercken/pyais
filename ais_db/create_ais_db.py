@@ -106,6 +106,28 @@ def create_tables(con):
               )
         """,
         """
+            create table if not exists baseStationReport
+            (
+                sentence_id integer not null,
+                msg_type    integer not null,
+                repeat      integer,
+                mmsi        integer,
+                year        integer,
+                month       integer,
+                day         integer,
+                hour        integer,
+                minute      integer,
+                second      integer,
+                accuracy    integer,
+                lon         real,
+                lat         real,
+                epfd        text,
+                spare_1     text,
+                raim        integer,
+                radio       integer
+            )
+        """,
+        """
             create table if not exists classBPositionReport
             (
                 sentence_id INTEGER NOT NULL,
@@ -132,6 +154,74 @@ def create_tables(con):
                 syncState INTEGER default 0,
                 slotTimeout INTEGER default 0,
                 subMessage INTEGER default 0
+            )
+        """,
+        """
+            create table if not exists extendedClassBPositionReport
+            (
+                sentence_id  integer not null,
+                msg_type     integer not null,
+                repeat       integer,
+                reserved_1   integer,
+                speed        real,
+                accuracy     integer,
+                lon          real,
+                lat          real,
+                course       real,
+                heading      integer,
+                second       integer,
+                reserved_2   integer,
+                shipname     text,
+                ship_type    integer,
+                to_bow       integer,
+                to_stern     integer,
+                to_port      integer,
+                to_starboard integer,
+                epfd         integer,
+                raim         integer,
+                dte          integer,
+                assigned     integer,
+                spare_1      text
+            )
+        """,
+        """
+            create table if not exists staticDataReport
+            (
+                report_id   integer
+                    constraint staticReportData_pk
+                        primary key autoincrement,
+                sentence_id integer not null,
+                msg_type    integer not null,
+                repeat      integer,
+                mmsi        integer,
+                partno      integer,
+                child_id    integer
+            )
+        """,
+        """
+            create table if not exists staticDataReportA
+            (
+                sentence_id integer not null,
+                parent_id   integer not null,
+                shipname    text,
+                spare_1     text
+            )
+        """,
+        """
+            create table if not exists staticDataReportB
+            (
+                sentence_id  integer not null,
+                parent_id    integer not null,
+                ship_type    integer,
+                vendorid     text,
+                model        integer,
+                serial       integer,
+                callsign     text,
+                to_bow       integer,
+                to_stern     integer,
+                to_port      integer,
+                to_starboard integer,
+                spare_1      text
             )
         """
     ]

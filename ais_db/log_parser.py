@@ -8,6 +8,7 @@ from pathlib import Path
 from sqlite3 import Error as SQL_Error, Connection
 
 from pyais import decode
+from pyais import messages
 
 # , IterMessages
 
@@ -43,7 +44,7 @@ def add_field_data(con, s_data):
             sql_args = {
                 'sentence_id': s_id, 'field1': fields[0], 'field2': fields[1], 'field3': fields[2],
                 'field4': fields[3], 'field5': fields[4], 'field6': fields[5], 'field7': fields[6]
-                }
+            }
             cur = con.cursor()
             cur.execute(sql, sql_args)
             con.commit()
@@ -125,7 +126,30 @@ def add_class_a_position_report(con, data):
 
 def add_base_station_report(con, data):
     """ Add the decoded data to a base_station_report.  Type 4. """
-    print("Base station report.")
+    sql = '''
+        insert into baseStationReport(
+            sentence_id, msg_type, repeat, mmsi, year, month, day, hour, minute, second, accuracy,
+            lon, lat, epfd, spare_1, raim, radio
+        ) VALUES (
+            :sentence_id, :msg_type, :repeat, :mmsi, :year, :month, :day, :hour, :minute, :second, :accuracy, 
+            :lon, :lat, :epfd, :spare_1, :raim, :radio
+        )
+    '''
+    sentence_id = get_last_sentence_id(con)
+    try:
+        sql_args = {
+            'sentence_id': sentence_id, 'msg_type': data.msg_type, 'repeat': data.repeat, 'mmsi': data.mmsi,
+            'year': data.year, 'month': data.month, 'day': data.day, 'hour': data.hour, 'minute': data.minute,
+            'second': data.second, 'accuracy': data.accuracy, 'lon': data.lon, 'lat': data.lat,
+            'epfd': data.epfd, 'spare_1': data.spare_1, 'raim': data.raim, 'radio': data.radio
+        }
+        cur = con.cursor()
+        cur.execute(sql, sql_args)
+        con.commit()
+    except SQL_Error as error:
+        raise SystemExit(
+            '\n\nERROR during insert = {}\n\n'.format(error)
+        )
 
 
 def add_class_b_position_report(con, data):
@@ -160,13 +184,187 @@ def add_class_b_position_report(con, data):
         con.commit()
     except SQL_Error as error:
         raise SystemExit(
-            '\n\nERROR during insert = {}\n\n'.format(error)
+            '\n\nclassBPositionReport - ERROR during insert = {}\n\n'.format(error)
         )
 
 
 def add_extended_class_b_position_report(con, data):
     """ Add extended class b position report. Type 19. """
-    print("Extended Class B Position Report")
+    sql = '''
+        insert into extendedClassBPositionReport(
+            sentence_id, msg_type, repeat, reserved_1, speed, accuracy, lon, lat, course, heading, 
+            second, reserved_2, shipname, ship_type, to_bow, to_stern, to_port, to_starboard, epfd, 
+            raim, dte, assigned, spare_1
+        )
+        values (
+            :sentence_id, :msg_type, :repeat, :reserved_1, :speed, :accuracy, :lon, :lat, :course, :heading, 
+            :second, :reserved_2, :shipname, :ship_type, :to_bow, :to_stern, :to_port, :to_starboard, :epfd, 
+            :raim, :dte, :assigned, :spare_1
+        )
+    '''
+    sentence_id = get_last_sentence_id(con)
+    try:
+        sql_args = {
+            'sentence_id': sentence_id, 'msg_type': data.msg_type,
+            'repeat': data.repeat, 'reserved_1': data.reserved_1,
+            'speed': data.speed, 'accuracy': data.accuracy,
+            'lon': data.lon, 'lat': data.lat, 'course': data.course,
+            'heading': data.heading, 'second': data.second,
+            'reserved_2': data.reserved_2, 'shipname': data.shipname,
+            'ship_type': data.ship_type, 'to_bow': data.to_bow, 'to_stern': data.to_stern,
+            'to_port': data.to_port, 'to_starboard': data.to_starboard,
+            'epfd': data.epfd, 'raim': data.raim, 'dte': data.dte,
+            'assigned': data.assigned, 'spare_1': data.spare_1
+        }
+        cur = con.cursor()
+        cur.execute(sql, sql_args)
+        con.commit()
+    except SQL_Error as error:
+        raise SystemExit(
+            '\n\nextendedClassBPositionReport - ERROR during insert = {}\n\n'.format(error)
+        )
+
+
+def get_last_static_data_report_id(con):
+    """ Get the last rowid from staticDataReport table. """
+    sql = ' select max(report_id) from staticDataReport '
+    try:
+        cur = con.cursor()
+        cur.execute(sql)
+        row = cur.fetchone()
+        if row is None:
+            report_id = 1
+        else:
+            report_id = row[0]
+    except SQL_Error as error:
+        raise SystemExit(
+            print('ERROR: {}'.format(error))
+        )
+    return report_id
+
+
+def get_last_row_id(con, tableName):
+    sql = ' select max(rowid) from ' + tableName
+    try:
+        cur = con.cursor()
+        cur.execute(sql)
+        row = cur.fetchone()
+        if row is None:
+            row_id = 1
+        else:
+            row_id = row[0]
+    except SQL_Error as error:
+        raise SystemExit(
+            print('\n\nERROR: {}'.format(error))
+        )
+    return row_id
+
+
+def update_static_data_report_child(con, parent_id, child_id):
+    sql = '''
+        update staticDataReport set child_id = :child_id
+        where report_id = :parent_id
+    '''
+    try:
+        sql_args = {'child_id': child_id, 'parent_id': parent_id}
+        cur = con.cursor()
+        cur.execute(sql, sql_args)
+        con.commit()
+    except SQL_Error as error:
+        raise SystemExit(
+            print('\n\nERROR: {}'.format(error))
+        )
+
+
+def add_static_data_report(con, data):
+    """ Add a static data report that is split based on the part number. """
+    sql = '''
+        insert into staticDataReport(
+            sentence_id, msg_type, repeat, mmsi, partno, child_id
+        )
+        values(
+            :sentence_id, :msg_type, :repeat, :mmsi, :partno, :child_id
+        )
+    '''
+    sentence_id = get_last_sentence_id(con)
+    child_id = 0
+    try:
+        sql_args = {
+            'sentence_id': sentence_id, 'msg_type': data.msg_type, 'repeat': data.repeat,
+            'mmsi': data.mmsi, 'partno': data.partno, 'child_id': child_id
+        }
+        cur = con.cursor()
+        cur.execute(sql, sql_args)
+        con.commit()
+    except SQL_Error as error:
+        raise SystemExit(
+            '\n\nextendedClassBPositionReport - ERROR during insert = {}\n\n'.format(error)
+        )
+
+    parent_id = get_last_static_data_report_id(con)
+
+    if data.partno == 0:
+        add_static_data_report_a(con, sentence_id, parent_id, data)
+        child_id = get_last_row_id(con, 'staticDataReportA')
+        update_static_data_report_child(con, parent_id, child_id)
+    elif data.partno == 1:
+        add_static_data_report_b(con, sentence_id, parent_id, data)
+        child_id = get_last_row_id(con, 'staticDataReportB')
+        update_static_data_report_child(con, parent_id, child_id)
+    else:
+        print("WARNING invalid partno in data - {}".format(data.partno))
+
+
+def add_static_data_report_a(con, sentence_id, parent_id, data):
+    """ Add the static data report. Type 24A. """
+    sql = '''
+        insert into staticDataReportA(
+            sentence_id, parent_id, shipname, spare_1
+        )
+        values(
+            :sentence_id, :parent_id, :shipname, :spare_1
+        ) 
+    '''
+    try:
+        sql_args = {
+            'sentence_id': sentence_id, 'parent_id': parent_id,
+            'shipname': data.shipname, 'spare_1': data.spare_1
+        }
+        cur = con.cursor()
+        cur.execute(sql, sql_args)
+        con.commit()
+    except SQL_Error as error:
+        raise SystemExit(
+            '\n\nstaticDataReportA - ERROR during insert = {}\n\n'.format(error)
+        )
+
+
+def add_static_data_report_b(con, sentence_id, parent_id, data):
+    """ Add the static data report. Type 24B. """
+    sql = '''
+        insert into staticDataReportB(
+            sentence_id, parent_id, ship_type, vendorid, model, serial, callsign, 
+            to_bow, to_stern, to_port, to_starboard, spare_1
+        )
+        values(
+            :sentence_id, :parent_id, :ship_type, :vendorid, :model, :serial, :callsign, 
+            :to_bow, :to_stern, :to_port, :to_starboard, :spare_1
+        ) 
+    '''
+    try:
+        sql_args = {
+            'sentence_id': sentence_id, 'parent_id': parent_id, 'ship_type': data.ship_type,
+            'vendorid': data.vendorid, 'model': data.model, 'serial': data.serial,
+            'callsign': data.callsign, 'to_bow': data.to_bow, 'to_stern': data.to_stern,
+            'to_port': data.to_port, 'to_starboard': data.to_starboard, 'spare_1': data.spare_1
+        }
+        cur = con.cursor()
+        cur.execute(sql, sql_args)
+        con.commit()
+    except SQL_Error as error:
+        raise SystemExit(
+            '\n\nstaticDataReportB - ERROR during insert = {}\n\n'.format(error)
+        )
 
 
 def add_decoded_data(con, data):
@@ -179,6 +377,7 @@ def add_decoded_data(con, data):
     base_station_report = [4]
     class_b_report = [18]
     extended_class_b_position_report = [19]
+    static_data_report = [24]
 
     msg_type = data.msg_type
 
@@ -190,6 +389,8 @@ def add_decoded_data(con, data):
         add_class_b_position_report(con, data)
     elif msg_type in extended_class_b_position_report:
         add_extended_class_b_position_report(con, data)
+    elif msg_type in static_data_report:
+        add_static_data_report(con, data)
 
     """    
     
