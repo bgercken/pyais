@@ -193,7 +193,7 @@ def create_tables(con):
                 sentence_id integer not null,
                 msg_type    integer not null,
                 repeat      integer,
-                mmsi        integer,
+                mmsi        integer not null,
                 partno      integer,
                 child_id    integer
             )
@@ -203,6 +203,7 @@ def create_tables(con):
             (
                 sentence_id integer not null,
                 parent_id   integer not null,
+                mmsi        integer not null, 
                 shipname    text,
                 spare_1     text
             )
@@ -212,6 +213,7 @@ def create_tables(con):
             (
                 sentence_id  integer not null,
                 parent_id    integer not null,
+                mmsi         integer not null,
                 ship_type    integer,
                 vendorid     text,
                 model        integer,

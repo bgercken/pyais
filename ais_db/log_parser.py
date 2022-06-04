@@ -274,7 +274,7 @@ def update_static_data_report_child(con, parent_id, child_id):
         con.commit()
     except SQL_Error as error:
         raise SystemExit(
-            print('\n\nERROR: {}'.format(error))
+            print('\n\nstaticDataReport update - ERROR: {}'.format(error))
         )
 
 
@@ -300,7 +300,7 @@ def add_static_data_report(con, data):
         con.commit()
     except SQL_Error as error:
         raise SystemExit(
-            '\n\nextendedClassBPositionReport - ERROR during insert = {}\n\n'.format(error)
+            '\n\nstaticDataReport - ERROR during insert = {}\n\n'.format(error)
         )
 
     parent_id = get_last_static_data_report_id(con)
@@ -321,15 +321,15 @@ def add_static_data_report_a(con, sentence_id, parent_id, data):
     """ Add the static data report. Type: 24A. """
     sql = '''
         insert into staticDataReportA(
-            sentence_id, parent_id, shipname, spare_1
+            sentence_id, parent_id, mmsi, shipname, spare_1
         )
         values(
-            :sentence_id, :parent_id, :shipname, :spare_1
+            :sentence_id, :parent_id, :mmsi, :shipname, :spare_1
         ) 
     '''
     try:
         sql_args = {
-            'sentence_id': sentence_id, 'parent_id': parent_id,
+            'sentence_id': sentence_id,  'parent_id': parent_id, 'mmsi': data.mmsi,
             'shipname': data.shipname, 'spare_1': data.spare_1
         }
         cur = con.cursor()
@@ -345,17 +345,17 @@ def add_static_data_report_b(con, sentence_id, parent_id, data):
     """ Add the static data report. Type: 24B. """
     sql = '''
         insert into staticDataReportB(
-            sentence_id, parent_id, ship_type, vendorid, model, serial, callsign, 
+            sentence_id, parent_id, mmsi, ship_type, vendorid, model, serial, callsign, 
             to_bow, to_stern, to_port, to_starboard, spare_1
         )
         values(
-            :sentence_id, :parent_id, :ship_type, :vendorid, :model, :serial, :callsign, 
+            :sentence_id, :parent_id, :mmsi, :ship_type, :vendorid, :model, :serial, :callsign, 
             :to_bow, :to_stern, :to_port, :to_starboard, :spare_1
         ) 
     '''
     try:
         sql_args = {
-            'sentence_id': sentence_id, 'parent_id': parent_id, 'ship_type': data.ship_type,
+            'sentence_id': sentence_id, 'parent_id': parent_id, 'mmsi': data.mmsi, 'ship_type': data.ship_type,
             'vendorid': data.vendorid, 'model': data.model, 'serial': data.serial,
             'callsign': data.callsign, 'to_bow': data.to_bow, 'to_stern': data.to_stern,
             'to_port': data.to_port, 'to_starboard': data.to_starboard, 'spare_1': data.spare_1
@@ -398,7 +398,7 @@ def add_class_a_static_voyage_data(con, data):
         con.commit()
     except SQL_Error as error:
         raise SystemExit(
-            '\n\nERROR during insert = {}\n\n'.format(error)
+            '\n\nclassAStaticVoyageData - ERROR during insert = {}\n\n'.format(error)
         )
 
 
@@ -425,14 +425,14 @@ def add_aid_to_navigation_report(con, data):
             'to_port': data.to_port, 'to_starboard': data.to_starboard, 'epfd': data.epfd,
             'second': data.second, 'off_position': data.off_position, 'reserved_1': data.reserved_1,
             'raim': data.raim, 'virtual_aid': data.virtual_aid, 'assigned': data.assigned,
-            'spare_1': data.spare_1, 'nane_ext': data.name_ext
+            'spare_1': data.spare_1, 'name_ext': data.name_ext
         }
         cur = con.cursor()
         cur.execute(sql, sql_args)
         con.commit()
     except SQL_Error as error:
         raise SystemExit(
-            '\n\nERROR during insert = {}\n\n'.format(error)
+            '\n\naidToNavigationReport- ERROR during insert = {}\n\n'.format(error)
         )
 
 
@@ -464,7 +464,7 @@ def add_standard_sar_aircraft_position_report(con, data):
         con.commit()
     except SQL_Error as error:
         raise SystemExit(
-            '\n\nERROR during insert = {}\n\n'.format(error)
+            '\n\nstandardSARAircraftPositionReport - ERROR during insert = {}\n\n'.format(error)
         )
 
 
