@@ -223,6 +223,81 @@ def create_tables(con):
                 to_starboard integer,
                 spare_1      text
             )
+        """,
+        """
+            create table if not exists classAStaticVoyageData
+            (
+                sentence_id  integer not null,
+                msg_type     integer not null,
+                mmsi         integer,
+                ais_version  integer,
+                imo          integer,
+                callsign     text,
+                shipname     text,
+                ship_type    integer,
+                to_bow       integer,
+                to_stern     integer,
+                to_port      integer,
+                to_starboard integer,
+                epfd         integer,
+                month        integer,
+                day          integer,
+                hour         integer,
+                minute       integer,
+                draught      real,
+                destination  text,
+                dte          integer,
+                spare_1      text
+            )
+        """,
+        """
+            create table if not exists aidToNavigationReport
+            (
+                sentence_id  integer not null,
+                msg_type     integer not null,
+                repeat       integer,
+                mmsi         integer,
+                aid_type     integer,
+                name         text,
+                accuracy     integer,
+                lon          real,
+                lat          real,
+                to_bow       integer,
+                to_stern     integer,
+                to_port      integer,
+                to_starboard integer,
+                epfd         integer,
+                second       integer,
+                off_position integer,
+                reserved_1   integer,
+                raim         integer,
+                virtual_aid  integer,
+                assigned     integer,
+                spare_1      text,
+                name_ext     text
+            )
+        """,
+        """
+            create table if not exists standardSARAircraftPositionReport
+            (
+                sentence_id integer not null,
+                msg_type    integer not null,
+                repeat      integer,
+                mmsi        integer,
+                alt         integer,
+                speed       real,
+                accuracy    integer,
+                lon         real,
+                lat         real,
+                course      real,
+                second      integer,
+                reserved_1  integer,
+                dte         integer,
+                spare_1     text,
+                assigned    integer,
+                raim        integer,
+                radio       integer
+            )
         """
     ]
     try:
