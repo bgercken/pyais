@@ -12,7 +12,7 @@ class AisMessageType:
     description: str
 
 @dataclass
-class APositionReportMessages:
+class APositionReportMessage:
     message_id: int
     parameter: str
     bits: int
@@ -308,6 +308,19 @@ def create_tables(con):
                 raim        integer,
                 radio       integer
             )
+        """,
+        """
+            create table if not exists classAPositionReportMessages
+            (
+                message_id  integer not null
+                    constraint classAPositionReportMessages_pk
+                        primary key autoincrement,
+                field       integer not null,
+                parameter   text    not null,
+                bits        integer not null,
+                value       integer not null,
+                description text    not null
+            )
         """
     ]
     try:
@@ -320,6 +333,65 @@ def create_tables(con):
         raise SystemExit(
             "\n\nERROR while creating table(s) - {}\n\n".format(error)
         )
+
+
+def add_a_position_report_messages(con):
+    data = [
+        APositionReportMessage(1, 'Message ID', 6, 1, 'Identifier for this message (1, 2 or 3)'),
+        APositionReportMessage(1, 'Message ID', 6, 2, 'Identifier for this message (1, 2 or 3)'),
+        APositionReportMessage(1, 'Message ID', 6, 3, 'Identifier for this message (1, 2 or 3)'),
+        APositionReportMessage(2, 'Repeat indicator', 2, 0,
+                               'Default. Used by the repeater to indicate how many times a message ' +
+                               'has been repeated. (0-3)'),
+        APositionReportMessage(2, 'Repeat indicator', 2, 1, 'Repeat once.'),
+        APositionReportMessage(2, 'Repeat indicator', 2, 2, 'Repeat twice.'),
+        APositionReportMessage(2, 'Repeat indicator', 2, 3, 'Do not repeat anymore.'),
+        APositionReportMessage(3, 'User ID', 30, -1, 'MMSI number'),
+        APositionReportMessage(4, 'Navigation Status', 4, 0, 'under way using engine'),
+        APositionReportMessage(4, 'Navigation Status', 4, 1, 'at anchor'),
+        APositionReportMessage(4, 'Navigation Status', 4, 2, 'not under command'),
+        APositionReportMessage(4, 'Navigation Status', 4, 3, 'restricted maneuverability'),
+        APositionReportMessage(4, 'Navigation Status', 4, 4, 'constrained by her draught'),
+        APositionReportMessage(4, 'Navigation Status', 4, 5, 'moored'),
+        APositionReportMessage(4, 'Navigation Status', 4, 6, 'aground'),
+        APositionReportMessage(4, 'Navigation Status', 4, 7, 'engaged in fishing'),
+        APositionReportMessage(4, 'Navigation Status', 4, 8, 'under way sailing'),
+        APositionReportMessage(4, 'Navigation Status', 4, 9,
+                               'reserved for future amendment of navigational status for ships carrying DG, HS, ' +
+                               'or MP, or IMO hazard or pollutant category C, high speed craft (HSC)'),
+        APositionReportMessage(4, 'Navigation Status', 4, 10,
+                               'reserved for future amendment of navigational status for ships carrying ' +
+                               'dangerous goods (DG), harmful substances (HS) or marine pollutants (MP), ' +
+                               'or IMO hazard or pollutant category A, wing in ground (WIG)'),
+        APositionReportMessage(4, 'Navigation Status', 4, 11, 'power-driven vessel towing astern (regional use)'),
+        APositionReportMessage(4, 'Navigation Status', 4, 12,
+                               'power-driven vessel pushing ahead or towing alongside (regional use)'),
+        APositionReportMessage(4, 'Navigation Status', 4, 13, 'reserved for future use'),
+        APositionReportMessage(4, 'Navigation Status', 4, 14, 'AIS-SART (active), MOB-AIS, EPIRB-AIS'),
+        APositionReportMessage(4, 'Navigation Status', 4, 15,
+                               'undefined = default (also used by AIS-SART, MOB-AIS and EPIRB-AIS under test)')
+    ]
+
+    sql = '''
+        insert into classAPositionReportMessages(
+            field, parameter, bits, value, description
+        )
+        values(
+            :field, :parameter, :bits, :value, :description
+        )
+    '''
+    for o in data:
+        print(o)
+        try:
+            sql_args = {
+                'field': o.field, 'parameter': o.parameter, 'bits': o.bits,
+                'value': o.value, 'description': o.description
+            }
+            cur = con.cursor()
+            cur.execute(sql, sql_args)
+            con.commit()
+        except SQL_Error as error:
+            raise SystemExit('\n\nERROR inserting values - {}'.format(error))
 
 
 def add_ais_message_types(con):
@@ -374,7 +446,6 @@ def add_ais_message_types(con):
         insert into aisMessageTypes(message_id, name, description)
         values(:message_id, :name, :description)
     '''
-
     for o in data:
         print(o)
         try:
