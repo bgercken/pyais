@@ -11,6 +11,14 @@ class AisMessageType:
     name: str
     description: str
 
+@dataclass
+class APositionReportMessages:
+    message_id: int
+    parameter: str
+    bits: int
+    value: int
+    description: str
+
 
 def get_db_connection(db_file):
     """ Get a connection to the database. """
