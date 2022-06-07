@@ -571,7 +571,13 @@ class MessageType1(Payload):
                          to_converter=ManeuverIndicator.from_value, signed=False)
     spare_1 = bit_field(3, bytes, default=b'')
     raim = bit_field(1, bool, default=0)
-    radio = bit_field(19, int, default=0, signed=False)
+
+    """ LOCAL CHANGES - DECODE THE COMMUNICATION STATE """
+    #  radio = bit_field(19, int, default=0, signed=False)
+    radio = 0
+    sync_state = bit_field(2, int, default=0, signed=False)
+    slot_timeout = bit_field(3, int, default=0, signed=False)
+    sub_message = bit_field(14, int, default=0, signed=False)
 
 
 class MessageType2(MessageType1):

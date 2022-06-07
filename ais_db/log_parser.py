@@ -98,13 +98,16 @@ def add_class_a_position_report(con, data):
     sql = '''
         insert into classAPositionReport(
             sentence_id, msg_type, repeat, mmsi, status, turn, speed,
-            accuracy, lon, lat, course, heading, second, maneuver, raim, radio
+            accuracy, lon, lat, course, heading, second, maneuver, raim, radio, 
+            syncState, slotTimeout, subMessage 
         )
         values(
             :sentence_id, :msg_type, :repeat, :mmsi, :status, :turn, :speed,
-            :accuracy, :lon, :lat, :course, :heading, :second, :maneuver, :raim, :radio
+            :accuracy, :lon, :lat, :course, :heading, :second, :maneuver, :raim, :radio,
+            :syncState, :slotTimeout, :subMessage
         )
     '''
+
     sentence_id = get_last_sentence_id(con)
     try:
         sql_args = {
@@ -113,7 +116,8 @@ def add_class_a_position_report(con, data):
             'turn': data.turn, 'speed': data.speed, 'accuracy': data.accuracy,
             'lon': data.lon, 'lat': data.lat, 'course': data.course, 'heading': data.heading,
             'second': data.second, 'maneuver': data.maneuver, 'raim': data.raim,
-            'radio': data.radio
+            'radio': data.radio, 'syncState': data.sync_state, 'slotTimeout': data.slot_timeout,
+            'subMessage': data.sub_message
         }
         cur = con.cursor()
         cur.execute(sql, sql_args)
