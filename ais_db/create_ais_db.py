@@ -11,12 +11,13 @@ class AisMessageType:
     name: str
     description: str
 
+
 @dataclass
 class APositionReportMessage:
-    message_id: int
+    field: int
     parameter: str
     bits: int
-    value: int
+    value: str
     description: str
 
 
@@ -318,7 +319,7 @@ def create_tables(con):
                 field       integer not null,
                 parameter   text    not null,
                 bits        integer not null,
-                value       integer not null,
+                value       text not null,
                 description text    not null
             )
         """
@@ -337,39 +338,76 @@ def create_tables(con):
 
 def add_a_position_report_messages(con):
     data = [
-        APositionReportMessage(1, 'Message ID', 6, 1, 'Identifier for this message (1, 2 or 3)'),
-        APositionReportMessage(1, 'Message ID', 6, 2, 'Identifier for this message (1, 2 or 3)'),
-        APositionReportMessage(1, 'Message ID', 6, 3, 'Identifier for this message (1, 2 or 3)'),
-        APositionReportMessage(2, 'Repeat indicator', 2, 0,
+        APositionReportMessage(1, 'Message ID', 6, '1', 'Identifier for this message (1, 2 or 3)'),
+        APositionReportMessage(1, 'Message ID', 6, '2', 'Identifier for this message (1, 2 or 3)'),
+        APositionReportMessage(1, 'Message ID', 6, '3', 'Identifier for this message (1, 2 or 3)'),
+        APositionReportMessage(2, 'Repeat indicator', 2, '0',
                                'Default. Used by the repeater to indicate how many times a message ' +
                                'has been repeated. (0-3)'),
-        APositionReportMessage(2, 'Repeat indicator', 2, 1, 'Repeat once.'),
-        APositionReportMessage(2, 'Repeat indicator', 2, 2, 'Repeat twice.'),
-        APositionReportMessage(2, 'Repeat indicator', 2, 3, 'Do not repeat anymore.'),
-        APositionReportMessage(3, 'User ID', 30, -1, 'MMSI number'),
-        APositionReportMessage(4, 'Navigation Status', 4, 0, 'under way using engine'),
-        APositionReportMessage(4, 'Navigation Status', 4, 1, 'at anchor'),
-        APositionReportMessage(4, 'Navigation Status', 4, 2, 'not under command'),
-        APositionReportMessage(4, 'Navigation Status', 4, 3, 'restricted maneuverability'),
-        APositionReportMessage(4, 'Navigation Status', 4, 4, 'constrained by her draught'),
-        APositionReportMessage(4, 'Navigation Status', 4, 5, 'moored'),
-        APositionReportMessage(4, 'Navigation Status', 4, 6, 'aground'),
-        APositionReportMessage(4, 'Navigation Status', 4, 7, 'engaged in fishing'),
-        APositionReportMessage(4, 'Navigation Status', 4, 8, 'under way sailing'),
-        APositionReportMessage(4, 'Navigation Status', 4, 9,
+        APositionReportMessage(2, 'Repeat indicator', 2, '1', 'Repeat once.'),
+        APositionReportMessage(2, 'Repeat indicator', 2, '2', 'Repeat twice.'),
+        APositionReportMessage(2, 'Repeat indicator', 2, '3', 'Do not repeat anymore.'),
+        APositionReportMessage(3, 'User ID', 30, 'N/A', 'MMSI number'),
+        APositionReportMessage(4, 'Navigation Status', 4, '0', 'under way using engine'),
+        APositionReportMessage(4, 'Navigation Status', 4, '1', 'at anchor'),
+        APositionReportMessage(4, 'Navigation Status', 4, '2', 'not under command'),
+        APositionReportMessage(4, 'Navigation Status', 4, '3', 'restricted maneuverability'),
+        APositionReportMessage(4, 'Navigation Status', 4, '4', 'constrained by her draught'),
+        APositionReportMessage(4, 'Navigation Status', 4, '5', 'moored'),
+        APositionReportMessage(4, 'Navigation Status', 4, '6', 'aground'),
+        APositionReportMessage(4, 'Navigation Status', 4, '7', 'engaged in fishing'),
+        APositionReportMessage(4, 'Navigation Status', 4, '8', 'under way sailing'),
+        APositionReportMessage(4, 'Navigation Status', 4, '9',
                                'reserved for future amendment of navigational status for ships carrying DG, HS, ' +
                                'or MP, or IMO hazard or pollutant category C, high speed craft (HSC)'),
-        APositionReportMessage(4, 'Navigation Status', 4, 10,
+        APositionReportMessage(4, 'Navigation Status', 4, '10',
                                'reserved for future amendment of navigational status for ships carrying ' +
                                'dangerous goods (DG), harmful substances (HS) or marine pollutants (MP), ' +
                                'or IMO hazard or pollutant category A, wing in ground (WIG)'),
-        APositionReportMessage(4, 'Navigation Status', 4, 11, 'power-driven vessel towing astern (regional use)'),
-        APositionReportMessage(4, 'Navigation Status', 4, 12,
+        APositionReportMessage(4, 'Navigation Status', 4, '11', 'power-driven vessel towing astern (regional use)'),
+        APositionReportMessage(4, 'Navigation Status', 4, '12',
                                'power-driven vessel pushing ahead or towing alongside (regional use)'),
-        APositionReportMessage(4, 'Navigation Status', 4, 13, 'reserved for future use'),
-        APositionReportMessage(4, 'Navigation Status', 4, 14, 'AIS-SART (active), MOB-AIS, EPIRB-AIS'),
-        APositionReportMessage(4, 'Navigation Status', 4, 15,
-                               'undefined = default (also used by AIS-SART, MOB-AIS and EPIRB-AIS under test)')
+        APositionReportMessage(4, 'Navigation Status', 4, '13', 'reserved for future use'),
+        APositionReportMessage(4, 'Navigation Status', 4, '14', 'AIS-SART (active), MOB-AIS, EPIRB-AIS'),
+        APositionReportMessage(4, 'Navigation Status', 4, '15',
+                               'undefined = default (also used by AIS-SART, MOB-AIS and EPIRB-AIS under test)'),
+        APositionReportMessage(5, 'Rate of turn', 8, '0 to +126', 'turning right at up to 708 deg per min or higher'),
+        APositionReportMessage(5, 'Rate of turn', 8, '0 to -126', 'turning left at up to 708 deg per min or higher'),
+        APositionReportMessage(5, 'Rate of turn', 8, '+127', 'turning right at more than 5 deg per 30 s'),
+        APositionReportMessage(5, 'Rate of turn', 8, '-127', 'turning left at more than 5 deg per 30 s'),
+        APositionReportMessage(5, 'Rate of turn', 8, '-128', '(80 hex) indicates no turn information ' +
+                               'available (default)'),
+        APositionReportMessage(6, 'SOG', 10, '0-102.1 knots', 'Speed over ground in 1/10 knot steps'),
+        APositionReportMessage(6, 'SOG', 10, '102.2', '102.2 knots or higher'),
+        APositionReportMessage(6, 'SOG', 10, '102.3', 'not available (range of parameter is 0-102.3)'),
+        APositionReportMessage(7, 'Position Accuracy', 1, '0', 'low > 10m (default)'),
+        APositionReportMessage(7, 'Position Accuracy', 1, '1', 'high <= 10m'),
+        APositionReportMessage(8, 'Longitude', 28, '+/-180 deg', 'Longitude in 1/10,000 min East=positive, ' +
+                               'W=negative'),
+        APositionReportMessage(8, 'Longitude', 28, '181', 'not available = default (6791AC0h)'),
+        APositionReportMessage(9, 'Latitude', 27, '+/-90 deg', 'Latitude in 1/10,000 min North=positive, ' +
+                               'South=negative '),
+        APositionReportMessage(9, 'Latitude', 27, '91', 'not available = default (3412140h)'),
+        APositionReportMessage(10, 'COG', 12, '0-3599', 'Course over ground in 1/10'),
+        APositionReportMessage(10, 'COG', 12, '3600', 'not available = default (E10h)'),
+        APositionReportMessage(10, 'COG', 12, '3601-4095', 'should not be used - out of range'),
+        APositionReportMessage(11, 'True heading', 9, '0-350', 'Degrees'),
+        APositionReportMessage(11, 'True heading', 9, '511', 'not available = default'),
+        APositionReportMessage(12, 'Time stamp', 6, '0-59', 'UTC second when the report was generated by the ' +
+                               'electronic position system (EPFS)'),
+        APositionReportMessage(12, 'Time stamp', 6, '60', 'Time stamp not available = default'),
+        APositionReportMessage(12, 'Time stamp', 6, '61', 'If positioning system is in manual input mode'),
+        APositionReportMessage(12, 'Time stamp', 6, '62', 'If electronic position fixing system operates in ' +
+                               'estimated (dead reckoning) mode'),
+        APositionReportMessage(12, 'Time stamp', 6, '63', 'If the positioning system is inoperative'),
+        APositionReportMessage(13, 'special maneuver indicator', 2, '0', 'not available = default'),
+        APositionReportMessage(13, 'special maneuver indicator', 2, '1', 'not engaged in special maneuver'),
+        APositionReportMessage(13, 'special maneuver indicator', 2, '2', 'engaged in special maneuver'),
+        APositionReportMessage(14, 'Spare', 3, '0', 'Not used - should be set to zero'),
+        APositionReportMessage(15, 'RAIM-flag', 1, '0', 'RAIM not in use = default (Receiver Autonomous ' +
+                               'Integrity Monitoring)'),
+        APositionReportMessage(15, 'RAIM-flag', 1, '1', 'RAIM in use'),
+        APositionReportMessage(16, 'Communication state', 19, 'Value', 'See communicationStateMessages table')
     ]
 
     sql = '''
@@ -480,10 +518,32 @@ def populate_ais_message_types(con):
         add_ais_message_types(con)
 
 
+def populate_a_position_report_messages(con):
+    """ A function to check for and then call populate a position report messages if needed. """
+
+    sql = '''
+        select count(*) from classAPositionReportMessages;
+    '''
+    try:
+        cur = con.cursor()
+        cur.execute(sql)
+        row = cur.fetchone()
+        if row is None:
+            message_count = 0
+        else:
+            message_count = row[0]
+    except SQL_Error as error:
+        raise SystemExit('\n\nERROR while populating message table - {}\n\n'.format(error))
+
+    if message_count == 0:
+        add_a_position_report_messages(con)
+
+
 def main(database_name):
     conn = get_db_connection(database_name)
     create_tables(conn)
     populate_ais_message_types(conn)
+    populate_a_position_report_messages(conn)
 
 
 if __name__ == '__main__':
